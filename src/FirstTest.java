@@ -14,62 +14,89 @@ import java.net.URL;
 
 public class FirstTest {
     private AppiumDriver driver;
-@Before
-    public void setUp() throws Exception
-    {
-        DesiredCapabilities capabilities = new DesiredCapabilities();
-        capabilities.setCapability("platformName","Android");
-        capabilities.setCapability("deviceName","AndroidTestDevice");
-        capabilities.setCapability("platformVersion","8.0");
-        capabilities.setCapability("automationName","Appium");
-        capabilities.setCapability("appPackage","org.wikipedia");
-        capabilities.setCapability("appActivity",".main.MainActivity");
-        capabilities.setCapability("app","C:\\Users\\ORud\\IdeaProjects\\JavaAppiumAutomation_2\\apks\\org.wikipedia.apk");
 
-        driver = new AndroidDriver(new URL("http://127.0.0.1:4723/wd/hub"), capabilities);
+    @Before
+    public void setUp() throws Exception {
+        DesiredCapabilities capabilities = new DesiredCapabilities();
+        capabilities.setCapability("platformName", "Android" );
+        capabilities.setCapability("deviceName", "AndroidTestDevice" );
+        capabilities.setCapability("platformVersion", "8.0" );
+        capabilities.setCapability("automationName", "Appium" );
+        capabilities.setCapability("appPackage", "org.wikipedia" );
+        capabilities.setCapability("appActivity", ".main.MainActivity" );
+        capabilities.setCapability("app", "C:\\Users\\ORud\\IdeaProjects\\JavaAppiumAutomation_2\\apks\\org.wikipedia.apk" );
+
+        driver = new AndroidDriver(new URL("http://127.0.0.1:4723/wd/hub" ), capabilities);
     }
+
     @After
-    public void tearDown()
-    {
+    public void tearDown() {
         driver.quit();
     }
+
     @Test
-    public void firstTest()
-    {
-        waitForElementByXpathAndClick(
-                "//*[contains(@text,'Search Wikipedia')]",
-                "Cannot find Search Wikipedia input",
+    public void cancelSearchTest() {
+        waitForElementAndClick(
+                By.id("org.wikipedia:id/search_container" ),
+                "Cannot find 'Search Wikipedia' input",
                 5
         );
-
+        waitForElementAndSendKeys(
+                By.xpath("//*[contains(@text, 'Search…')]" ),
+                "Java",
+                "Cannot find search input",
+                5
+        );
         assertElementHasText(
-                "//*[contains(@text,'Search…')]",
+               By.xpath("//*[contains(@text, 'Java') and contains(@text, 'Java (programming language)')]"),
+                "Java (programming language)",
+                "Title with this text not found",
+                5
+        );
+        waitForElementAndClick(
+                By.id("org.wikipedia:id/search_close_btn"),
+                "Cannot find X to cancel search",
+                5
+
+        );
+        assertElementHasText(
+                By.xpath("//*[contains(@text, 'Search…')]"),
                 "Search…",
-                "Cannot find Search… input",
+                "Title with this text not found",
                 5
         );
     }
+        private WebElement waitForElementPresent (By by, String error_message,long timeoutInSeconds)
+        {
+            WebDriverWait wait = new WebDriverWait(driver, timeoutInSeconds);
+            wait.withMessage(error_message + "\n" );
+            return wait.until(
+                    ExpectedConditions.presenceOfElementLocated(by)
+            );
+        }
+        private WebElement waitForElementPresent (By by, String error_message)
+        {
+            return waitForElementPresent(by, error_message, 5);
+        }
+        private WebElement waitForElementAndClick (By by, String error_message,long timeoutInSeconds)
+        {
+            WebElement element = waitForElementPresent(by, error_message, timeoutInSeconds);
+            element.click();
+            return element;
+        }
+        private WebElement waitForElementAndSendKeys (By by, String value, String error_message,long timeoutInSeconds)
+        {
+            WebElement element = waitForElementPresent(by, error_message, timeoutInSeconds);
+            element.sendKeys(value);
+            return element;
+        }
+        private void assertElementHasText(By by, String text, String error_massage, long timeoutInSeconds)
+        {
+        WebElement waitSearchLine = waitForElementPresent(by, error_massage, timeoutInSeconds);
+        String value = waitSearchLine.getAttribute("text");
+        Assert.assertEquals(error_massage, text, value);
+        }
 
-   private void assertElementHasText(String xpath, String text, String error_massage, long timeoutInSeconds)
-   {
-       WebElement waitSearchLine = waitForElementPresentByXpath(xpath, error_massage, timeoutInSeconds);
-       String value = waitSearchLine.getAttribute("text");
-       Assert.assertEquals(error_massage, text, value);
-   }
 
-    private WebElement waitForElementPresentByXpath(String xpath, String error_message, long timeoutInSeconds)
-    {
-        WebDriverWait wait = new WebDriverWait(driver, timeoutInSeconds);
-        wait.withMessage(error_message + "\n");
-        By by=By.xpath(xpath);
-        return wait.until(
-            ExpectedConditions.presenceOfElementLocated(by)
-        );
     }
-    private WebElement waitForElementByXpathAndClick(String xpath, String error_message, long timeoutInSeconds)
-    {
-        WebElement element = waitForElementPresentByXpath(xpath, error_message, timeoutInSeconds);
-        element.click();
-        return element;
-    }
-}
+
