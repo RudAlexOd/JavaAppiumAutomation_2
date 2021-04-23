@@ -11,6 +11,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.net.URL;
+import java.util.List;
 
 public class FirstTest {
     private AppiumDriver driver;
@@ -65,6 +66,47 @@ public class FirstTest {
                 "Title with this text not found",
                 5
         );
+
+    }
+    @Test
+    public void checkingWorldsInSearch()
+    {
+        waitForElementAndClick(
+                By.id("org.wikipedia:id/search_container" ),
+                "Cannot find 'Search Wikipedia' input",
+                5
+        );
+        waitForElementAndSendKeys(
+                By.xpath("//*[contains(@text, 'Search…')]" ),
+                "Java",
+                "Cannot find search input",
+                5
+        );
+        assertElementHasText(
+                By.xpath("//*[contains(@text, 'Java') and contains(@text, 'Java (programming language)')]"),
+                "Java (programming language)",
+                "Title with this text not found",
+                5
+        );
+
+        List <WebElement> list = driver.findElements(By.id("org.wikipedia:id/page_list_item_title"));
+
+        for (WebElement i : list)
+        {
+            String element = i.getText();
+            String substring = "java";
+            if (element.toLowerCase().contains(substring)) {
+                System.out.println(element);
+                System.out.println("ok");
+            } else {
+                Assert.assertEquals(
+                        "Article isn`t contains 'java'",
+                        substring,
+                        element
+                );
+            }
+        }
+
     }
         private WebElement waitForElementPresent (By by, String error_message,long timeoutInSeconds)
         {
@@ -98,5 +140,7 @@ public class FirstTest {
         }
 
 
+
     }
+
 
